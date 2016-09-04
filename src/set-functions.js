@@ -103,8 +103,6 @@ module.exports.difference = function difference(a, b) {
   return result;
 };
 
-var BreakException = {};
-
 /**
  * Check set equality
  *
@@ -131,25 +129,23 @@ module.exports.isEqual = function isEqual(a, b) {
     b = new Set(b);
   }
 
-  if (a.size != b.size) {
+  if (a.size !== b.size) {
     return false;
   }
 
-  try {
-    a.forEach(function (item) {
-      if (!b.has(item)) {
-        // short-circuit by throwing on first difference
-        throw BreakException
-      }
-    });
-  } catch (e) {
-    if (e === BreakException) {
+  var values = a.values(),
+      step;
+
+  while ((step = values.next())) {
+    if (step.done) {
+      break;
+    }
+
+    if (!b.has(step.value)) {
       return false;
-    } else {
-      // pass on any exceptions that we didn't generate
-      throw e;
     }
   }
+
   return true;
 };
 
